@@ -13,6 +13,7 @@ app.use(express.static("public", {
 app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true}));
+app.use(express.json());
 
 // validator
 const planController = require("./Controllers/planController");
@@ -33,7 +34,7 @@ app.post("/api/edit",planController.editPlan);
 app.post("/api/delete", planController.deletePlan);
 
 app.post('/register', async (req, res) => {
-   const { email, password } = req.body;
+   let { email, password } = req.body;
  
    try {
      // Check if user already contro
@@ -63,17 +64,20 @@ app.post('/register', async (req, res) => {
  app.post('/login', async (req, res) => {
    const { email, password } = req.body;
    console.log(req.body);
+   console.log(email);
  
    try {
      // Find user by email
      const user = await userModel.getUserByEmail(email);
-     console.log("this is the variable 'user' being returned from the model", user);
      if (!user) {
        return res.status(404).send('User not found');
      }
  
      // Compare passwords
-     if (await argon2.verify(user.passwordHash, password)) {
+     const {passwordHash} = user;
+     console.log(passwordHash);
+     console.log(password);
+     if (await argon2.verify(passwordHash, password)) {
        console.log('Login successful');
        res.status(200).send('Login successful');
      } else {

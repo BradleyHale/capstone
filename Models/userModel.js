@@ -29,7 +29,6 @@ async function addUser(email, password) {
 }
 
 function getUserByEmail(email) {
-    console.log("this is the email being fed to the get user model function", email);
     const sql = `SELECT * FROM Users WHERE email=@email`;
     const stmt = db.prepare(sql);
     const userEmail = stmt.get({
