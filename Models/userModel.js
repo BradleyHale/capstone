@@ -13,42 +13,38 @@ const db = require("./db")
 async function addUser(email, password) {
     const userID = crypto.randomUUID();
     const hash = await argon2.hash(password);
-    const insertUserQuery = 'INSERT INTO Users (userID, email, passwordHash) VALUES (?, ?, ?)';
-    return new Promise((resolve, reject) => {
-        db.run(insertUserQuery, [userID, email, hash], function(err) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(userID);
-            }
+    const sql = `INSERT INTO Users (userID, email, passwordHash) VALUES (@userID, @email, @hash)`;
+    const stmt = db.prepare(sql);
+    try {
+        stmt.run({
+            "userID":userID,
+            "email":email,
+            "hash":hash,
         });
-    });
+        return true;
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
 }
 
 function getUserByEmail(email) {
-    const selectUserQuery = 'SELECT * FROM Users WHERE email = ?';
-    return new Promise((resolve, reject) => {
-        db.get(selectUserQuery, [email], (err, row) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(row);
-            }
-        });
+    console.log("this is the email being fed to the get user model function", email);
+    const sql = `SELECT * FROM Users WHERE email=@email`;
+    const stmt = db.prepare(sql);
+    const userEmail = stmt.get({
+        "email": email
     });
+    return userEmail;
 }
 
 function getUserByUserID(userID) {
-    const selectUserQuery = 'SELECT * FROM Users WHERE userID = ?';
-    return new Promise((resolve, reject) => {
-        db.get(selectUserQuery, [userID], (err, row) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(row);
-            }
-        });
+    const sql = `SELECT * FROM Users WHERE userID=@username`;
+    const stmt = db.prepare(sql);
+    const user = stmt.get({
+        "userID": userID
     });
+    return user;
 }
 
 function setEmail(email, userID) {

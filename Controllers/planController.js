@@ -93,7 +93,7 @@ function addToDatabase(req, res) {
     return res.json({ message: "Plan added successfully" });
 }
 
-function editPlan(req,res) {
+async function editPlan(req,res) {
     try {
         console.log(req.body);
         let {planID,overallSQFT, lengthFt, lengthIn, widthFt, widthIn, heightFt, heightIn, floors } = req.body;
@@ -107,7 +107,7 @@ function editPlan(req,res) {
         heightIn = parseInt(heightIn);
         floors = parseInt(floors);
     
-        planModel.editPlan(req.body.planID,{overallSQFT, lengthFt, lengthIn, widthFt, widthIn, heightFt,heightIn, heightIn, floors});
+        await planModel.editPlan(req.body.planID,{overallSQFT, lengthFt, lengthIn, widthFt, widthIn, heightFt,heightIn, heightIn, floors});
         res.redirect("/edit");
         return res.json({ message: "plan edited successfully"});
     } catch (error) {

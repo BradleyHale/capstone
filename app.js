@@ -2,6 +2,7 @@
 require("dotenv").config();
 const path = require('path');
 const express = require("express");
+const argon2 = require("argon2");
 const bodyParser = require("body-parser");
 const app = express();
 app.use(express.static("public", {
@@ -16,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true}));
 // validator
 const planController = require("./Controllers/planController");
 const userController = require("./Controllers/userController");
+const userModel = require("./Models/userModel");
 
 // controller
 
@@ -60,10 +62,12 @@ app.post('/register', async (req, res) => {
  // Login endpoint
  app.post('/login', async (req, res) => {
    const { email, password } = req.body;
+   console.log(req.body);
  
    try {
      // Find user by email
      const user = await userModel.getUserByEmail(email);
+     console.log("this is the variable 'user' being returned from the model", user);
      if (!user) {
        return res.status(404).send('User not found');
      }
