@@ -43,11 +43,8 @@ app.post('/register', async (req, res) => {
        return res.status(400).send('User already exists');
      }
  
-     // Hash password
-     const hashedPassword = await argon2.hash(password);
- 
      // Add user to the database
-     const userID = await userModel.addUser(email, hashedPassword);
+     const userID = await userModel.addUser(email, password);
      if (!userID) {
        return res.status(500).send('Error registering user');
      }
@@ -64,7 +61,6 @@ app.post('/register', async (req, res) => {
  app.post('/login', async (req, res) => {
    const { email, password } = req.body;
    console.log(req.body);
-   console.log(email);
  
    try {
      // Find user by email
@@ -72,15 +68,21 @@ app.post('/register', async (req, res) => {
      if (!user) {
        return res.status(404).send('User not found');
      }
+     console.log("user", user);
  
      // Compare passwords
      const {passwordHash} = user;
-     console.log(passwordHash);
-     console.log(password);
+     console.log("password", password);
+    //  let temp = argon2.hash(password, {salt :"7Qa3WjSsxQG8CJOtJ2zgQQ"});
+    //  console.log("hash of given password", temp);
+    //  console.log("hash of password in database",passwordHash);
+    //  console.log("stored hash", passwordHash);
      if (await argon2.verify(passwordHash, password)) {
        console.log('Login successful');
        res.status(200).send('Login successful');
      } else {
+        console.log(passwordHash);
+        console.log(password);
        res.status(401).send('Invalid password');
      }
    } catch (error) {
