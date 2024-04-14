@@ -22,9 +22,12 @@
     "argon2": "^0.40.1",
     "better-sqlite3": "^9.4.5",
     "body-parser": "^1.20.2",
+    "connect-redis": "^7.1.1",
     "dotenv": "^16.4.1",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
+    "express-session": "^1.18.0",
+    "redis": "^3.1.2",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {

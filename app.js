@@ -1,38 +1,55 @@
 "use strict";
 require("dotenv").config();
-const path = require('path');
+const session = require("express-session");
 const express = require("express");
-const argon2 = require("argon2");
+const redis = require("redis");
+const RedisStore = require("connect-redis").default;
+// app libraries
 const bodyParser = require("body-parser");
 const app = express();
+// initializing render engine
 app.use(express.static("public", {
    index: "index.html",
    extensions: ['html']
 }));
+// session management configuration
+const sessionConfig = {
+  store: new RedisStore({ client: redis.createClient()}),
+  port: 6379,
+  host: 'localhost',
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  name: "session",
+  cookie: {
+      httpOnly: true,
+      maxAge: 60000 * 1, // exactly 10 minutes, using this to test sessions
+  }
+};
 
+// initializing session parser
+const sessionParser = session(sessionConfig);
+app.use(sessionParser);
+// initializing view engine and JSON parsings
 app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(express.json());
 
-// validator
+// requiring controllers
 const planController = require("./Controllers/planController");
 const userController = require("./Controllers/userController");
+// requiring models
 const userModel = require("./Models/userModel");
-
-// controller
-
-//
+// endpoints
 app.get("/", (req, res) => {
-    console.log("this is a test");
+  res.render("index", {"loggedIn": req.session?.user?.isLoggedIn});
 });
-
 app.get("/api/search", planController.searchByOperations);
 app.get("/results/:planID",planController.renderSingleResult);
 app.post("/api/add",planController.addToDatabase);
 app.post("/api/edit",planController.editPlan);
 app.post("/api/delete", planController.deletePlan);
-
 app.post('/register', async (req, res) => {
    let { email, password } = req.body;
  
@@ -58,45 +75,23 @@ app.post('/register', async (req, res) => {
  });
  
  // Login endpoint
- app.post('/login', async (req, res) => {
-   const { email, password } = req.body;
-   console.log(req.body);
- 
-   try {
-     // Find user by email
-     const user = await userModel.getUserByEmail(email);
-     if (!user) {
-       return res.status(404).send('User not found');
-     }
-     console.log("user", user);
- 
-     // Compare passwords
-     const {passwordHash} = user;
-     console.log("password", password);
-    //  let temp = argon2.hash(password, {salt :"7Qa3WjSsxQG8CJOtJ2zgQQ"});
-    //  console.log("hash of given password", temp);
-    //  console.log("hash of password in database",passwordHash);
-    //  console.log("stored hash", passwordHash);
-     if (await argon2.verify(passwordHash, password)) {
-       console.log('Login successful');
-       res.status(200).send('Login successful');
-     } else {
-        console.log(passwordHash);
-        console.log(password);
-       res.status(401).send('Invalid password');
-     }
-   } catch (error) {
-     console.error('Error logging in:', error);
-     res.status(500).send('Internal Server Error');
-   }
- });
- 
+ app.post('/login', userController.logIn);
  app.post("/register", userController.createNewUser);
+
+ app.post("/logout", (req, res) => {
+  console.log(req.session);
+  if(req.session.key) {
+    req.session.destroy(function() {
+      res.redirect("/")
+    });
+  }
+});
 
 const {PORT} = process.env;
 app.listen(PORT, () => {
    console.log(`Listening on http://localhost:${PORT}`)
 })
 module.exports = {
-   app
+   app,
+   sessionParser
 };
