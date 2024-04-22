@@ -160,7 +160,7 @@ function testFunction() {
     const result = stmt.all();
     return result;
 }
-
+// ----------------- anything below this line is legacy code!!!!!! ------------------------
 function searchByWidth(upper, lower) {
     const sql = `SELECT * FROM plans WHERE widthFt BETWEEN @upper AND @lower`;
     const stmt = db.prepare(sql);
@@ -210,7 +210,7 @@ function getPlanByID(planID) {
     const row = stmt.get({planID});
     return row;
 }
-
+// legacy code is now over --------------------------------------------------------
 module.exports = {
     testFunction,
     searchByFloors,

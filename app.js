@@ -1,9 +1,9 @@
 "use strict";
 require("dotenv").config();
 const session = require("express-session");
-const express = require("express");
 const redis = require("redis");
 const RedisStore = require("connect-redis").default;
+const express = require("express");
 // app libraries
 const bodyParser = require("body-parser");
 const app = express();
@@ -23,13 +23,16 @@ const sessionConfig = {
   name: "session",
   cookie: {
       httpOnly: true,
-      maxAge: 60000 * 1, // exactly 10 minutes, using this to test sessions
+      maxAge: 60000 * 10, // exactly 10 minute, using this to test sessions
   }
 };
+
+console.log(session);
 
 // initializing session parser
 const sessionParser = session(sessionConfig);
 app.use(sessionParser);
+console.log(sessionParser);
 // initializing view engine and JSON parsings
 app.set('view engine', 'ejs');
 app.use(bodyParser.json());
@@ -78,14 +81,17 @@ app.post('/register', async (req, res) => {
  app.post('/login', userController.logIn);
  app.post("/register", userController.createNewUser);
 
- app.post("/logout", (req, res) => {
-  console.log(req.session);
-  if(req.session.key) {
-    req.session.destroy(function() {
-      res.redirect("/")
-    });
-  }
-});
+ app.get("/logout", (req, res) => {
+  console.log("the server has reached the logout endpoint");
+  req.session.email = null;
+  req.session.save();
+  req.session.regenerate(function (err) {
+
+    res.redirect('/');
+
+  })
+
+ });
 
 const {PORT} = process.env;
 app.listen(PORT, () => {

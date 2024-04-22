@@ -1,6 +1,4 @@
 "use strict";
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
 const crypto = require("crypto");
 const argon2 = require("argon2");
 
@@ -46,22 +44,9 @@ function getUserByUserID(userID) {
     return user;
 }
 
-function setEmail(email, userID) {
-    const updateUserQuery = 'UPDATE Users SET email = ? WHERE userID = ?';
-    return new Promise((resolve, reject) => {
-        db.run(updateUserQuery, [email, userID], function(err) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
-        });
-    });
-}
 
 module.exports = {
     addUser,
     getUserByEmail,
     getUserByUserID,
-    setEmail
 };

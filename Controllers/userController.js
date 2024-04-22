@@ -21,25 +21,38 @@ async function logIn(req, res) {
     if (!user) {
       return res.status(404).send('User not found');
     }
-    console.log("user", user);
 
     // Compare passwords
     const {passwordHash} = user;
     console.log(" this is the password: ", password);
     if (await argon2.verify(passwordHash, password)) {
-      req.session.regenerate((err) => {
-          if (err) {
-              console.error('Error regenerating session:', err);
-              return res.sendStatus(500);
-          }
-          console.log("req.session", req.session);
-          req.session.user = {
-              email: email,
-              isLoggedIn: true
-          };
-          console.log(req.session.user);
-          return res.redirect("/add");
+      console.log("this is a test to see if the function has gotten to the session part of the code");
+      req.session.regenerate(function (err) {
+    
+        req.session.email = req.body.email;
+        req.session.isLoggedIn = true;
+        console.log(req.session);
+    
+        // save the session before redirection to ensure page
+        // load does not happen before session is saved
+        req.session.save(function (err) {
+          res.redirect('/');
+        })
       })
+      // req.session.regenerate((err) => {
+      //     if (err) {
+      //         console.error('Error regenerating session:', err);
+      //         return res.sendStatus(500);
+      //     }
+      //     req.session.user = {};
+      //     req.session.user.email = email;
+      //     req.session.user.isLoggedIn = true;
+      //     console.log("this is the user object", user);
+      //     console.log("this is the session object", req.session);
+      //     console.log("session id:", req.session.id);
+      //     console.log("cookie associated with session", req.session.cookie);
+      //     return res.redirect("/add");
+      // });
     } else {
       console.log(passwordHash);
       console.log(password);
