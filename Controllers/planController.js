@@ -2,7 +2,7 @@
 const planModel = require("../Models/planModel");
 
 async function searchByOperations(req,res) {
-    let {SQFTUpper,SQFTLower,widthUpper,widthLower,lengthUpper,lengthLower,heightUpper,heightLower,floors,buildingType,searchOperations} = req.query;
+    let {SQFTUpper,SQFTLower,widthUpper,widthLower,lengthUpper,lengthLower,heightUpper,heightLower,floors} = req.query;
     let operations = req.query.searchOperations;
     /*
         searchOperations is supposed to be an array of strings. checboxes return
@@ -27,7 +27,7 @@ async function searchByOperations(req,res) {
     heightLower = parseInt(heightLower);
     floors = parseInt(floors);
 
-    let results = planModel.generalSearch(req.query,operations);
+    let results = await planModel.generalSearch(req.query,operations);
     /*
         currentResults are the results gotten from each iteration of this loop.
         the function will go through each element in the "operations" array and for each element

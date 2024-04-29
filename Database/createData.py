@@ -4,8 +4,6 @@ import random
 random.seed(a=None, version=2)
 # implement merge sort
 generated_plan_ids = set()
-
-buildingTypes = ["residential, commercial, industrial, agricultural, municipal"]
 with open("dataSeed.csv", "a", newline='') as f:
     csv_writer = csv.writer(f)
 

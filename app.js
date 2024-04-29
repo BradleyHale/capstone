@@ -1,7 +1,7 @@
 "use strict";
 require("dotenv").config();
 const session = require("express-session");
-const redis = require("redis");
+const redis = require("ioredis");
 const RedisStore = require("connect-redis").default;
 const express = require("express");
 // app libraries
@@ -14,7 +14,7 @@ app.use(express.static("public", {
 }));
 // session management configuration
 const sessionConfig = {
-  store: new RedisStore({ client: redis.createClient()}),
+  store: new RedisStore({ client: new redis()}),
   port: 6379,
   host: 'localhost',
   secret: process.env.SESSION_SECRET,
@@ -81,13 +81,13 @@ app.post('/register', async (req, res) => {
  app.post('/login', userController.logIn);
  app.post("/register", userController.createNewUser);
 
- app.get("/logout", (req, res) => {
+ app.post("/logout", (req, res) => {
   console.log("the server has reached the logout endpoint");
   req.session.email = null;
   req.session.save();
   req.session.regenerate(function (err) {
 
-    res.redirect('/');
+    res.redirect('/search');
 
   })
 
